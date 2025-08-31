@@ -1,0 +1,19 @@
+default_language_version:
+  python: python3.11
+
+repos:
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.1
+    hooks:
+      - id: mypy
+        name: mypy (src and tests)
+        args:
+          - --config-file=pyproject.toml
+        files: ^(src/|tests/).*\.py$
+
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        files: \.py$
+
