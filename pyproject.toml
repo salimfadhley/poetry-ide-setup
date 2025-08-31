@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-ide-setup"
-version = "0.1.0"
+version = "0.1.1"
     description = "Automatically configure IntelliJ IDEA and PyCharm to use Poetry's Python interpreter"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
