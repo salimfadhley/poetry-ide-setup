@@ -2,7 +2,7 @@
 
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any, cast
 
 from .exceptions import ConfigurationError, XMLParsingError
 
@@ -16,27 +16,31 @@ class XMLUpdater:
         interpreter_path: Path,
         project_name: str,
         environment_name: str,
+        python_version: Optional[str] = None,
         backup: bool = True,
     ) -> None:
         """
         Update misc.xml with Poetry Python interpreter configuration.
-        
+
         Args:
             misc_xml_path: Path to misc.xml file
             interpreter_path: Path to Python interpreter
             project_name: Name of the project
             environment_name: Name of Poetry environment
+            python_version: Optional Python version string (e.g., "3.12")
             backup: Whether to create backup before modifying
-            
+
         Raises:
             XMLParsingError: If XML cannot be parsed or written
             ConfigurationError: If configuration cannot be updated
         """
         if backup and misc_xml_path.exists():
             XMLUpdater._create_backup(misc_xml_path)
-        
+
         # Try to parse existing misc.xml or create new one
         if misc_xml_path.exists():
+            if misc_xml_path.is_dir():
+                raise ConfigurationError(f"{misc_xml_path} is a directory, not a file")
             try:
                 tree = ET.parse(misc_xml_path)
                 root = tree.getroot()
@@ -46,10 +50,12 @@ class XMLUpdater:
             # Create new misc.xml structure
             root = ET.Element("project", version="4")
             tree = ET.ElementTree(root)
-        
+
         # Update or create ProjectRootManager component
-        XMLUpdater._update_project_root_manager(root, interpreter_path, project_name, environment_name)
-        
+        XMLUpdater._update_project_root_manager(
+            root, interpreter_path, project_name, environment_name, python_version
+        )
+
         # Write the updated XML
         try:
             XMLUpdater._write_xml_with_formatting(tree, misc_xml_path)
@@ -62,28 +68,29 @@ class XMLUpdater:
         interpreter_path: Path,
         project_name: str,
         environment_name: str,
+        python_version: Optional[str] = None,
     ) -> None:
         """Update or create ProjectRootManager component in the XML."""
-        
+
         # Find existing ProjectRootManager or create new one
         prm_component = None
         for component in root.findall("component"):
             if component.get("name") == "ProjectRootManager":
                 prm_component = component
                 break
-        
+
         if prm_component is None:
             prm_component = ET.SubElement(root, "component", name="ProjectRootManager")
-        
+
         # Set version and language level (defaults that work for most Python projects)
         prm_component.set("version", "2")
         prm_component.set("languageLevel", "JDK_11")  # IntelliJ default
-        
+
         # Set project SDK name - this is the key part for IDE integration
-        sdk_name = f"Poetry ({environment_name})"
+        sdk_name = f"Python {python_version} {project_name}"
         prm_component.set("project-jdk-name", sdk_name)
         prm_component.set("project-jdk-type", "Python SDK")
-        
+
         # Add output path if not present
         output_element = prm_component.find("output")
         if output_element is None:
@@ -98,19 +105,25 @@ class XMLUpdater:
         return backup_path
 
     @staticmethod
-    def _write_xml_with_formatting(tree: ET.ElementTree, file_path: Path) -> None:
+    def _write_xml_with_formatting(tree: Any, file_path: Path) -> None:
         """Write XML tree to file with proper formatting."""
         # Add XML declaration and formatting
-        XMLUpdater._indent_xml(tree.getroot())
-        
+        # getroot may return None per typeshed; guard and cast for mypy
+        root = tree.getroot()
+        if root is None:
+            raise XMLParsingError("XML tree has no root element")
+        XMLUpdater._indent_xml(root)
+
         # Write with proper encoding and declaration
-        with open(file_path, 'wb') as f:
+        with open(file_path, "wb") as f:
             f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
-            tree.write(f, encoding='utf-8', xml_declaration=False)
+            tree.write(f, encoding="utf-8", xml_declaration=False)
 
     @staticmethod
-    def _indent_xml(elem: ET.Element, level: int = 0) -> None:
+    def _indent_xml(elem: Optional[ET.Element], level: int = 0) -> None:
         """Add indentation to XML elements for readable formatting."""
+        if elem is None:
+            return
         indent = "  " * level  # 2 spaces per level
         if len(elem):
             if not elem.text or not elem.text.strip():
@@ -129,31 +142,31 @@ class XMLUpdater:
     def validate_misc_xml(misc_xml_path: Path) -> bool:
         """
         Validate that misc.xml can be parsed and has expected structure.
-        
+
         Args:
             misc_xml_path: Path to misc.xml file
-            
+
         Returns:
             True if XML is valid and parseable
         """
         if not misc_xml_path.exists():
             return True  # Missing file is OK, we can create it
-        
+
         try:
             tree = ET.parse(misc_xml_path)
             root = tree.getroot()
-            
+
             # Check basic structure
             if root.tag != "project":
                 return False
-            
+
             # Check version attribute
             version = root.get("version")
             if version is None:
                 return False
-            
+
             return True
-            
+
         except ET.ParseError:
             return False
 
@@ -161,25 +174,25 @@ class XMLUpdater:
     def get_current_interpreter(misc_xml_path: Path) -> Optional[str]:
         """
         Get the currently configured Python interpreter from misc.xml.
-        
+
         Args:
             misc_xml_path: Path to misc.xml file
-            
+
         Returns:
             Current interpreter SDK name or None if not configured
         """
         if not misc_xml_path.exists():
             return None
-        
+
         try:
             tree = ET.parse(misc_xml_path)
             root = tree.getroot()
-            
+
             for component in root.findall("component"):
                 if component.get("name") == "ProjectRootManager":
                     return component.get("project-jdk-name")
-            
+
             return None
-            
+
         except ET.ParseError:
             return None

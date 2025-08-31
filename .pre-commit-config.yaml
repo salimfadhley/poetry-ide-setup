@@ -2,18 +2,21 @@ default_language_version:
   python: python3.11
 
 repos:
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.1
+  - repo: local
     hooks:
       - id: mypy
-        name: mypy (src and tests)
+        name: mypy (poetry)
+        entry: poetry run mypy
+        language: system
+        types: [python]
+        pass_filenames: true
         args:
           - --config-file=pyproject.toml
-        files: ^(src/|tests/).*\.py$
-
-  - repo: https://github.com/psf/black
-    rev: 24.8.0
-    hooks:
+          - --no-incremental
       - id: black
-        files: \.py$
-
+        name: black (poetry)
+        entry: poetry run black
+        language: system
+        types: [python]
+        pass_filenames: true
+        args: []

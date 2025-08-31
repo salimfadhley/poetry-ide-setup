@@ -39,10 +39,10 @@ def mock_idea_project(temp_dir: Path) -> Path:
     """Create a mock IntelliJ IDEA project structure."""
     idea_dir = temp_dir / ".idea"
     idea_dir.mkdir()
-    
+
     # Create .name file
     (idea_dir / ".name").write_text("test-project")
-    
+
     # Create modules.xml
     modules_content = """<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
@@ -53,7 +53,7 @@ def mock_idea_project(temp_dir: Path) -> Path:
   </component>
 </project>"""
     (idea_dir / "modules.xml").write_text(modules_content)
-    
+
     # Create workspace.xml
     workspace_content = """<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
@@ -62,12 +62,14 @@ def mock_idea_project(temp_dir: Path) -> Path:
   </component>
 </project>"""
     (idea_dir / "workspace.xml").write_text(workspace_content)
-    
+
     # Create .gitignore
-    (idea_dir / ".gitignore").write_text("""shelf/
+    (idea_dir / ".gitignore").write_text(
+        """shelf/
 workspace.xml
-""")
-    
+"""
+    )
+
     return temp_dir
 
 
@@ -75,7 +77,7 @@ workspace.xml
 def mock_idea_python_project(mock_idea_project: Path) -> Path:
     """Create a mock IntelliJ IDEA Python project structure."""
     idea_dir = mock_idea_project / ".idea"
-    
+
     # Create modules.xml with Python module type
     modules_content = """<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
@@ -86,7 +88,7 @@ def mock_idea_python_project(mock_idea_project: Path) -> Path:
   </component>
 </project>"""
     (idea_dir / "modules.xml").write_text(modules_content)
-    
+
     # Create test-project.iml with Python module type
     iml_content = """<?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
@@ -97,7 +99,7 @@ def mock_idea_python_project(mock_idea_project: Path) -> Path:
   </component>
 </module>"""
     (idea_dir / "test-project.iml").write_text(iml_content)
-    
+
     return mock_idea_project
 
 
@@ -106,7 +108,7 @@ def mock_misc_xml(temp_dir: Path) -> Path:
     """Create a mock misc.xml file."""
     idea_dir = temp_dir / ".idea"
     idea_dir.mkdir(exist_ok=True)
-    
+
     misc_content = """<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="Python 3.11" project-jdk-type="Python SDK">
@@ -115,7 +117,7 @@ def mock_misc_xml(temp_dir: Path) -> Path:
 </project>"""
     misc_xml_path = idea_dir / "misc.xml"
     misc_xml_path.write_text(misc_content)
-    
+
     return misc_xml_path
 
 
@@ -125,9 +127,9 @@ def mock_interpreter_path(temp_dir: Path) -> Path:
     venv_dir = temp_dir / "venv"
     bin_dir = venv_dir / "bin"
     bin_dir.mkdir(parents=True)
-    
+
     python_path = bin_dir / "python"
     python_path.write_text("#!/usr/bin/env python3\nprint('Mock Python interpreter')")
     python_path.chmod(0o755)
-    
+
     return python_path
