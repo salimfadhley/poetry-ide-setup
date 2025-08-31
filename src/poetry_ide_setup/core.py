@@ -157,6 +157,53 @@ def setup_ide_configuration(
                 "Please fix or delete the file and try again."
             )
 
+        # Detect runtime IDE and register SDK globally if possible
+        try:
+            from .runtime_detector import RuntimeIdeDetector
+
+            context = RuntimeIdeDetector.detect_jetbrains_context()
+            if (
+                context["ide"]
+                and context["ide"] != "JetBrains (unknown product)"
+                and context["config_dir"]
+            ):
+                if verbose:
+                    console.print(
+                        f"[dim]Detected {context['ide']}, registering SDK globally...[/dim]"
+                    )
+
+                jdk_table_path = (
+                    Path(context["config_dir"]) / "options" / "jdk.table.xml"
+                )
+                try:
+                    XMLUpdater.register_global_sdk(
+                        jdk_table_path=jdk_table_path,
+                        sdk_name=python_sdk_name,
+                        interpreter_path=interpreter_path,
+                        python_version=python_version,
+                        backup=True,
+                    )
+                    if verbose:
+                        console.print(
+                            f"[dim]✓ SDK registered in {context['ide']} global configuration[/dim]"
+                        )
+                except Exception as e:
+                    if verbose:
+                        console.print(
+                            f"[yellow]Warning: Failed to register SDK globally: {e}[/yellow]"
+                        )
+                    # Continue with project-level configuration even if global registration fails
+            elif verbose:
+                console.print(
+                    "[dim]IDE not detected, skipping global SDK registration[/dim]"
+                )
+        except Exception as e:
+            if verbose:
+                console.print(
+                    f"[yellow]Warning: Runtime IDE detection failed: {e}[/yellow]"
+                )
+
+        # Update project-level configuration
         try:
             XMLUpdater.update_misc_xml(
                 misc_xml_path=misc_xml_path,
