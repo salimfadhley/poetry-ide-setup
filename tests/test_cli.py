@@ -18,7 +18,7 @@ class TestCLI:
         """Set up test runner."""
         self.runner = CliRunner()
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_success(
         self, mock_setup: MagicMock, temp_dir: Path, mock_interpreter_path: Path
     ) -> None:
@@ -39,7 +39,7 @@ class TestCLI:
         assert str(mock_interpreter_path) in result.stdout
         assert "test-project" in result.stdout
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_with_project_path(
         self, mock_setup: MagicMock, temp_dir: Path, mock_interpreter_path: Path
     ) -> None:
@@ -60,7 +60,7 @@ class TestCLI:
         args, kwargs = mock_setup.call_args
         assert kwargs["project_path"] == temp_dir
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_dry_run(
         self, mock_setup: MagicMock, temp_dir: Path, mock_interpreter_path: Path
     ) -> None:
@@ -82,7 +82,7 @@ class TestCLI:
         args, kwargs = mock_setup.call_args
         assert kwargs["dry_run"] is True
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_force(
         self, mock_setup: MagicMock, temp_dir: Path, mock_interpreter_path: Path
     ) -> None:
@@ -103,7 +103,7 @@ class TestCLI:
         args, kwargs = mock_setup.call_args
         assert kwargs["force"] is True
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_verbose(
         self, mock_setup: MagicMock, temp_dir: Path, mock_interpreter_path: Path
     ) -> None:
@@ -125,7 +125,7 @@ class TestCLI:
         args, kwargs = mock_setup.call_args
         assert kwargs["verbose"] is True
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_all_options(
         self, mock_setup: MagicMock, temp_dir: Path, mock_interpreter_path: Path
     ) -> None:
@@ -151,7 +151,7 @@ class TestCLI:
         assert kwargs["force"] is True
         assert kwargs["verbose"] is True
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_poetry_ide_setup_error(self, mock_setup: MagicMock) -> None:
         """Test CLI handling of PoetryIdeSetupError."""
         mock_setup.side_effect = PoetryIdeSetupError("Test error message")
@@ -161,7 +161,7 @@ class TestCLI:
         assert result.exit_code == 1
         assert "Error: Test error message" in result.stdout
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_unexpected_error(self, mock_setup: MagicMock) -> None:
         """Test CLI handling of unexpected errors."""
         mock_setup.side_effect = ValueError("Unexpected error")
@@ -171,7 +171,7 @@ class TestCLI:
         assert result.exit_code == 1
         assert "Unexpected error: Unexpected error" in result.stdout
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_unexpected_error_verbose(self, mock_setup: MagicMock) -> None:
         """Test CLI handling of unexpected errors with verbose output."""
         mock_setup.side_effect = ValueError("Unexpected error")
@@ -205,7 +205,7 @@ class TestCLI:
                 f"CLI help failed with exit code {result.exit_code}: {result.stdout}"
             )
 
-    @patch("poetry_ide_setup.core.setup_ide_configuration")
+    @patch("poetry_ide_setup.__main__.setup_ide_configuration")
     def test_cli_current_directory_default(
         self, mock_setup: MagicMock, mock_interpreter_path: Path
     ) -> None:

@@ -109,6 +109,7 @@ class TestSetupIdeConfiguration:
             mock_interpreter_path,
             "test-env-abc123",
         )
+        mock_poetry_detector.get_python_version.return_value = "3.12"
 
         mock_project_detector.find_idea_directory.return_value = (
             mock_idea_python_project / ".idea"
@@ -118,9 +119,9 @@ class TestSetupIdeConfiguration:
             mock_idea_python_project / ".idea" / "misc.xml"
         )
 
-        # Mock that interpreter is already correctly configured
+        # Mock that interpreter is already correctly configured with new SDK format
         mock_xml_updater.get_current_interpreter.return_value = (
-            "Poetry (test-env-abc123)"
+            "Python 3.12 test-project"
         )
 
         # Run setup
@@ -128,7 +129,7 @@ class TestSetupIdeConfiguration:
 
         # Verify results
         assert result.was_updated is False
-        assert result.previous_interpreter == "Poetry (test-env-abc123)"
+        assert result.previous_interpreter == "Python 3.12 test-project"
 
         # Verify XML was NOT updated
         mock_xml_updater.update_misc_xml.assert_not_called()

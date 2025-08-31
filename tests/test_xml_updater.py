@@ -24,6 +24,7 @@ class TestXMLUpdater:
             interpreter_path=mock_interpreter_path,
             project_name="test-project",
             environment_name="test-env-abc123",
+            python_version="3.12",
             backup=False,
         )
 
@@ -38,7 +39,7 @@ class TestXMLUpdater:
 
         prm = root.find(".//component[@name='ProjectRootManager']")
         assert prm is not None
-        assert prm.get("project-jdk-name") == "Poetry (test-env-abc123)"
+        assert prm.get("project-jdk-name") == "Python 3.12 test-project"
         assert prm.get("project-jdk-type") == "Python SDK"
 
     def test_update_misc_xml_existing_file(
@@ -50,6 +51,7 @@ class TestXMLUpdater:
             interpreter_path=mock_interpreter_path,
             project_name="test-project",
             environment_name="test-env-abc123",
+            python_version="3.12",
             backup=False,
         )
 
@@ -59,7 +61,7 @@ class TestXMLUpdater:
 
         prm = root.find(".//component[@name='ProjectRootManager']")
         assert prm is not None
-        assert prm.get("project-jdk-name") == "Poetry (test-env-abc123)"
+        assert prm.get("project-jdk-name") == "Python 3.12 test-project"
         assert prm.get("project-jdk-type") == "Python SDK"
 
     def test_update_misc_xml_with_backup(
@@ -73,6 +75,7 @@ class TestXMLUpdater:
             interpreter_path=mock_interpreter_path,
             project_name="test-project",
             environment_name="test-env-abc123",
+            python_version="3.12",
             backup=True,
         )
 
@@ -94,6 +97,7 @@ class TestXMLUpdater:
                 interpreter_path=mock_interpreter_path,
                 project_name="test-project",
                 environment_name="test-env-abc123",
+                python_version="3.12",
                 backup=False,
             )
 
@@ -113,6 +117,7 @@ class TestXMLUpdater:
                 interpreter_path=mock_interpreter_path,
                 project_name="test-project",
                 environment_name="test-env-abc123",
+                python_version="3.12",
                 backup=False,
             )
 
@@ -212,6 +217,7 @@ class TestXMLUpdater:
             interpreter_path=mock_interpreter_path,
             project_name="test-project",
             environment_name="test-env-abc123",
+            python_version="3.12",
             backup=False,
         )
 
@@ -221,7 +227,7 @@ class TestXMLUpdater:
 
         prm = root.find(".//component[@name='ProjectRootManager']")
         assert prm is not None
-        assert prm.get("project-jdk-name") == "Poetry (test-env-abc123)"
+        assert prm.get("project-jdk-name") == "Python 3.12 test-project"
 
         other = root.find(".//component[@name='OtherComponent']")
         assert other is not None
