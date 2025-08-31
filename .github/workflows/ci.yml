@@ -47,7 +47,10 @@ jobs:
   release:
     name: Bump Version on Success
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      !startsWith(github.event.head_commit.message, 'chore(release): bump version')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -72,12 +75,36 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
+      - name: Report build status via gh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run view $GITHUB_RUN_ID --json status,conclusion,jobs \
+            --jq '.status + ":" + (.conclusion // "")'
+
+      - name: Determine version bump from Conventional Commits
+        id: semver
+        run: |
+          git fetch --tags --quiet
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then RANGE="$LAST_TAG..HEAD"; else RANGE=""; fi
+          COMMITS=$(git log --format=%B $RANGE)
+          if echo "$COMMITS" | grep -E '(^|\n)(feat|fix|refactor|chore|docs|test|build|ci)(\(.+\))?!:' -q || \
+             echo "$COMMITS" | grep -E 'BREAKING CHANGE' -q; then
+            BUMP=major
+          elif echo "$COMMITS" | grep -E '(^|\n)feat(\(.+\))?:' -q; then
+            BUMP=minor
+          else
+            BUMP=patch
+          fi
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
+
       - name: Bump version (patch)
         id: bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          poetry version patch
+          poetry version ${{ steps.semver.outputs.bump }}
           VERSION=$(poetry version -s)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           git add pyproject.toml
@@ -85,4 +112,3 @@ jobs:
           git tag "v$VERSION"
           git push
           git push --tags
-
