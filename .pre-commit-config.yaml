@@ -20,3 +20,9 @@ repos:
         types: [python]
         pass_filenames: true
         args: []
+      - id: pytest
+        name: pytest (poetry)
+        entry: poetry run pytest -q
+        language: system
+        types: [python]
+        pass_filenames: false
