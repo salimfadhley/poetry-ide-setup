@@ -1,5 +1,12 @@
 # poetry-ide-setup
 
+**⚠️ DEPRECATED: Don't use this script it's pointless.**
+
+PyCharm can now detect pyproject.toml files and automatically configure.
+IntelliJ's jdks XML config file is highly variable over time and requires too much effort to keep up with, hence I cannot be bothered.
+
+---
+
 Automatically configure IntelliJ IDEA and PyCharm to use Poetry's Python interpreter.
 
 ## Overview
